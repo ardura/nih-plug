@@ -102,7 +102,6 @@ pub fn clamp_output_event_timing(timing: u32, total_buffer_len: u32) -> u32 {
 /// - A file path, in which case the output gets appended to the end of that file which will be
 ///   created if necessary.
 pub fn setup_logger() {
-    // If opening the file fails, then we'll log to STDERR anyways, hence this closure
     let log_level = if cfg!(debug_assertions) {
         log::LevelFilter::Trace
     } else {
@@ -111,7 +110,8 @@ pub fn setup_logger() {
 
     let logger_builder = nih_log::LoggerBuilder::new(log_level)
         .filter_module("cosmic_text::buffer")
-        .filter_module("cosmic_text::shape");
+        .filter_module("cosmic_text::shape")
+        .filter_module("selectors::matching");
 
     // Always show the module in debug builds, makes it clearer where messages are coming from and
     // it helps set up filters

@@ -672,7 +672,7 @@ mod tests {
         assert_eq!(smoother.next(), 20);
     }
 
-    /// Same as [linear_f32_smoothing], but skipping steps instead.
+    /// Same as [`linear_f32_smoothing`], but skipping steps instead.
     #[test]
     fn skipping_linear_f32_smoothing() {
         let smoother: Smoother<f32> = Smoother::new(SmoothingStyle::Linear(100.0));
@@ -685,7 +685,7 @@ mod tests {
         assert_eq!(smoother.next(), 20.0);
     }
 
-    /// Same as [linear_i32_smoothing], but skipping steps instead.
+    /// Same as [`linear_i32_smoothing`], but skipping steps instead.
     #[test]
     fn skipping_linear_i32_smoothing() {
         let smoother: Smoother<i32> = Smoother::new(SmoothingStyle::Linear(100.0));
@@ -698,7 +698,7 @@ mod tests {
         assert_eq!(smoother.next(), 20);
     }
 
-    /// Same as [logarithmic_f32_smoothing], but skipping steps instead.
+    /// Same as [`logarithmic_f32_smoothing`], but skipping steps instead.
     #[test]
     fn skipping_logarithmic_f32_smoothing() {
         let smoother: Smoother<f32> = Smoother::new(SmoothingStyle::Logarithmic(100.0));
@@ -711,7 +711,7 @@ mod tests {
         assert_eq!(smoother.next(), 20.0);
     }
 
-    /// Same as [logarithmic_i32_smoothing], but skipping steps instead.
+    /// Same as [`logarithmic_i32_smoothing`], but skipping steps instead.
     #[test]
     fn skipping_logarithmic_i32_smoothing() {
         let smoother: Smoother<i32> = Smoother::new(SmoothingStyle::Logarithmic(100.0));

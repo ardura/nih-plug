@@ -42,12 +42,17 @@ where
     FMap: Fn(&Params) -> &P + Copy + 'static,
 {
     fn clone(&self) -> Self {
-        Self {
-            param: self.param,
-            params: self.params.clone(),
-            params_to_param: self.params_to_param,
-        }
+        *self
     }
+}
+
+impl<L, Params, P, FMap> Copy for ParamWidgetData<L, Params, P, FMap>
+where
+    L: Lens<Target = Params> + Copy,
+    Params: 'static,
+    P: Param + 'static,
+    FMap: Fn(&Params) -> &P + Copy + 'static,
+{
 }
 
 impl<L, Params, P, FMap> ParamWidgetData<L, Params, P, FMap>
@@ -72,7 +77,7 @@ where
     {
         let params_to_param = self.params_to_param;
 
-        self.params.clone().map(move |params| {
+        self.params.map(move |params| {
             let param = params_to_param(params);
             f(param)
         })
@@ -98,7 +103,7 @@ impl ParamWidgetBase {
     /// `Params` object to the parameter you want to display a widget for. Parameter changes are
     /// handled by emitting [`ParamEvent`][super::ParamEvent]s which are automatically handled by
     /// the VIZIA wrapper.
-    pub fn new<L, Params, P, FMap>(cx: &mut Context, params: L, params_to_param: FMap) -> Self
+    pub fn new<L, Params, P, FMap>(cx: &Context, params: L, params_to_param: FMap) -> Self
     where
         L: Lens<Target = Params> + Clone,
         Params: 'static,
@@ -136,7 +141,6 @@ impl ParamWidgetBase {
         //         outlive the editor
         let param: &P = unsafe {
             &*params
-                .clone()
                 .map(move |params| params_to_param(params) as *const P)
                 .get(cx)
         };

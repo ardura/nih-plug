@@ -1,5 +1,5 @@
 // Spectral Compressor: an FFT based compressor
-// Copyright (C) 2021-2023 Robbert van der Helm
+// Copyright (C) 2021-2024 Robbert van der Helm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -101,12 +101,8 @@ impl View for Analyzer {
         // TODO: Display the frequency range below the graph
 
         // Draw the border last
-        let border_width = match cx.border_width().unwrap_or_default() {
-            Units::Pixels(val) => val,
-            Units::Percentage(val) => bounds.w.min(bounds.h) * (val / 100.0),
-            _ => 0.0,
-        };
-        let border_color: vg::Color = cx.border_color().cloned().unwrap_or_default().into();
+        let border_width = cx.border_width();
+        let border_color: vg::Color = cx.border_color().into();
 
         let mut path = vg::Path::new();
         {
@@ -122,7 +118,7 @@ impl View for Analyzer {
         }
 
         let paint = vg::Paint::color(border_color).with_line_width(border_width);
-        canvas.stroke_path(&mut path, &paint);
+        canvas.stroke_path(&path, &paint);
     }
 }
 
@@ -144,8 +140,8 @@ fn draw_spectrum(
 ) {
     let bounds = cx.bounds();
 
-    let line_width = cx.style.dpi_factor as f32 * 1.5;
-    let text_color: vg::Color = cx.font_color().cloned().unwrap_or_default().into();
+    let line_width = cx.scale_factor() * 1.5;
+    let text_color: vg::Color = cx.font_color().into();
     // This is used to draw the individual bars
     let bars_paint = vg::Paint::color(text_color).with_line_width(line_width);
     // And this color is used to draw the mesh part of the spectrum. We'll create a gradient paint
@@ -206,7 +202,7 @@ fn draw_spectrum(
 
         previous_physical_x_coord = physical_x_coord;
     }
-    canvas.stroke_path(&mut bars_path, &bars_paint);
+    canvas.stroke_path(&bars_path, &bars_paint);
 
     // The mesh path starts at the bottom left, follows the top envelope of the spectrum analyzer,
     // and ends in the bottom right
@@ -249,7 +245,7 @@ fn draw_spectrum(
         0.0,
         previous_physical_x_coord,
         0.0,
-        &[
+        [
             (0.0, lighter_text_color),
             (0.707, text_color),
             (1.0, text_color),
@@ -257,7 +253,7 @@ fn draw_spectrum(
     )
     // NOTE:  This is very important, otherwise this looks all kinds of gnarly
     .with_anti_alias(false);
-    canvas.fill_path(&mut mesh_path, &mesh_paint);
+    canvas.fill_path(&mesh_path, &mesh_paint);
 }
 
 /// Overlays the threshold curve over the spectrum analyzer. If either the upwards or downwards
@@ -265,7 +261,7 @@ fn draw_spectrum(
 fn draw_threshold_curve(cx: &mut DrawContext, canvas: &mut Canvas, analyzer_data: &AnalyzerData) {
     let bounds = cx.bounds();
 
-    let line_width = cx.style.dpi_factor as f32 * 3.0;
+    let line_width = cx.scale_factor() * 3.0;
     let downwards_paint =
         vg::Paint::color(DOWNWARDS_THRESHOLD_CURVE_COLOR).with_line_width(line_width);
     let upwards_paint = vg::Paint::color(UPWARDS_THRESHOLD_CURVE_COLOR).with_line_width(line_width);
@@ -301,7 +297,7 @@ fn draw_threshold_curve(cx: &mut DrawContext, canvas: &mut Canvas, analyzer_data
         // This does a way better job at cutting off the tops and bottoms of the graph than we could do
         // by hand
         canvas.scissor(bounds.x, bounds.y, bounds.w, bounds.h);
-        canvas.stroke_path(&mut path, &paint);
+        canvas.stroke_path(&path, &paint);
         canvas.reset_scissor();
     };
 
@@ -374,6 +370,6 @@ fn draw_gain_reduction(
 
     canvas
         .global_composite_blend_func(vg::BlendFactor::DstAlpha, vg::BlendFactor::OneMinusDstColor);
-    canvas.fill_path(&mut path, &paint);
+    canvas.fill_path(&path, &paint);
     canvas.global_composite_blend_func(vg::BlendFactor::One, vg::BlendFactor::OneMinusSrcAlpha);
 }

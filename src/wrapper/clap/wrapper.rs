@@ -64,7 +64,6 @@ use crossbeam::atomic::AtomicCell;
 use crossbeam::channel::{self, SendTimeoutError};
 use crossbeam::queue::ArrayQueue;
 use parking_lot::Mutex;
-use raw_window_handle::RawWindowHandle;
 use std::any::Any;
 use std::borrow::Borrow;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -425,7 +424,10 @@ impl<P: ClapPlugin> MainThreadExecutor<Task<P>> for Wrapper<P> {
 }
 
 impl<P: ClapPlugin> Wrapper<P> {
-    pub fn new(host_callback: *const clap_host) -> Arc<Self> {
+    /// # Safety
+    ///
+    /// `host_callback` needs to outlive the returned object.
+    pub unsafe fn new(host_callback: *const clap_host) -> Arc<Self> {
         let mut plugin = P::default();
         let task_executor = Mutex::new(plugin.task_executor());
 
@@ -878,6 +880,11 @@ impl<P: ClapPlugin> Wrapper<P> {
     }
 
     /// Handle all incoming events from an event queue. This will clear `self.input_events` first.
+    ///
+    /// # Safety
+    ///
+    /// `in_` must contain only pointers to valid data (Clippy insists on there being a safety
+    /// section here).
     pub unsafe fn handle_in_events(
         &self,
         in_: &clap_input_events,
@@ -909,6 +916,11 @@ impl<P: ClapPlugin> Wrapper<P> {
     /// `(sample_idx, event_idx)` tuple. This allows for splitting the audio buffer into segments
     /// with distinct sample values to enable sample accurate automation without modifications to the
     /// wrapped plugin.
+    ///
+    /// # Safety
+    ///
+    /// `in_` must contain only pointers to valid data (Clippy insists on there being a safety
+    /// section here).
     pub unsafe fn handle_in_events_until(
         &self,
         in_: &clap_input_events,
@@ -966,6 +978,10 @@ impl<P: ClapPlugin> Wrapper<P> {
     /// plugin is not actually processing audio.
     ///
     /// The `total_buffer_len` argument is used to clamp out of bounds events to the buffer's length.
+    ///
+    /// # Safety
+    ///
+    /// `out` must be a valid object (Clippy insists on there being a safety section here).
     pub unsafe fn handle_out_events(
         &self,
         out: &clap_output_events,
@@ -1374,6 +1390,11 @@ impl<P: ClapPlugin> Wrapper<P> {
     ///
     /// If the event was a transport event and the `transport_info` argument is not `None`, then the
     /// pointer will be changed to point to the transport information from this event.
+    ///
+    /// # Safety
+    ///
+    /// `in_` must contain only pointers to valid data (Clippy insists on there being a safety
+    /// section here).
     pub unsafe fn handle_in_event(
         &self,
         event: *const clap_event_header,
@@ -2747,28 +2768,27 @@ impl<P: ClapPlugin> Wrapper<P> {
             let mut editor_handle = wrapper.editor_handle.lock();
             if editor_handle.is_none() {
                 let api = CStr::from_ptr(window.api);
-                let handle = if api == CLAP_WINDOW_API_X11 {
-                    let mut handle = raw_window_handle::XcbHandle::empty();
-                    handle.window = window.specific.x11 as u32;
-                    RawWindowHandle::Xcb(handle)
+                let parent_handle = if api == CLAP_WINDOW_API_X11 {
+                    ParentWindowHandle::X11Window(window.specific.x11 as u32)
                 } else if api == CLAP_WINDOW_API_COCOA {
-                    let mut handle = raw_window_handle::AppKitHandle::empty();
-                    handle.ns_view = window.specific.cocoa;
-                    RawWindowHandle::AppKit(handle)
+                    ParentWindowHandle::AppKitNsView(window.specific.cocoa)
                 } else if api == CLAP_WINDOW_API_WIN32 {
-                    let mut handle = raw_window_handle::Win32Handle::empty();
-                    handle.hwnd = window.specific.win32;
-                    RawWindowHandle::Win32(handle)
+                    ParentWindowHandle::Win32Hwnd(window.specific.win32)
                 } else {
                     nih_debug_assert_failure!("Host passed an invalid API");
                     return false;
                 };
 
                 // This extension is only exposed when we have an editor
-                *editor_handle = Some(wrapper.editor.borrow().as_ref().unwrap().lock().spawn(
-                    ParentWindowHandle { handle },
-                    wrapper.clone().make_gui_context(),
-                ));
+                *editor_handle = Some(
+                    wrapper
+                        .editor
+                        .borrow()
+                        .as_ref()
+                        .unwrap()
+                        .lock()
+                        .spawn(parent_handle, wrapper.clone().make_gui_context()),
+                );
 
                 true
             } else {

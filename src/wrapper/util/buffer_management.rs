@@ -193,7 +193,6 @@ impl BufferManager {
                     {
                         let output_channel_pointer =
                             output_channel_pointers.ptrs.as_ptr().add(channel_idx);
-                        assert!(!output_channel_pointer.is_null());
 
                         *output_slice = std::slice::from_raw_parts_mut(
                             (*output_channel_pointer).add(sample_offset),
@@ -231,7 +230,6 @@ impl BufferManager {
                     {
                         let input_channel_pointer =
                             input_channel_pointers.ptrs.as_ptr().add(channel_idx);
-                        assert!(!input_channel_pointer.is_null());
 
                         output_slice.copy_from_slice(std::slice::from_raw_parts_mut(
                             (*input_channel_pointer).add(sample_offset),
@@ -275,7 +273,6 @@ impl BufferManager {
                     {
                         let input_channel_pointer =
                             input_channel_pointers.ptrs.as_ptr().add(channel_idx);
-                        assert!(!input_channel_pointer.is_null());
 
                         nih_debug_assert!(num_samples <= channel.capacity());
                         channel.resize(num_samples, 0.0);
@@ -336,7 +333,6 @@ impl BufferManager {
                         {
                             let output_channel_pointer =
                                 output_channel_pointers.ptrs.as_ptr().add(channel_idx);
-                            assert!(!output_channel_pointer.is_null());
 
                             *output_slice = std::slice::from_raw_parts_mut(
                                 (*output_channel_pointer).add(sample_offset),

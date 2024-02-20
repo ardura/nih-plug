@@ -1,5 +1,5 @@
 // Spectral Compressor: an FFT based compressor
-// Copyright (C) 2021-2023 Robbert van der Helm
+// Copyright (C) 2021-2024 Robbert van der Helm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -83,11 +83,11 @@ pub(crate) fn create(editor_state: Arc<ViziaState>, editor_data: Data) -> Option
         assets::register_noto_sans_light(cx);
         assets::register_noto_sans_thin(cx);
 
-        cx.add_theme(include_str!("editor/theme.css"));
+        if let Err(err) = cx.add_stylesheet(include_style!("src/editor/theme.css")) {
+            nih_error!("Failed to load stylesheet: {err:?}")
+        }
 
         editor_data.clone().build(cx);
-
-        ResizeHandle::new(cx);
 
         HStack::new(cx, |cx| {
             main_column(cx);
@@ -100,6 +100,8 @@ pub(crate) fn create(editor_state: Arc<ViziaState>, editor_data: Data) -> Option
                 }
             });
         });
+
+        ResizeHandle::new(cx);
     })
 }
 
@@ -113,9 +115,8 @@ fn main_column(cx: &mut Context) {
 
             HStack::new(cx, |cx| {
                 Label::new(cx, "Spectral Compressor")
-                    .font_family(vec![FamilyOwned::Name(String::from(
-                        assets::NOTO_SANS_THIN,
-                    ))])
+                    .font_family(vec![FamilyOwned::Name(String::from(assets::NOTO_SANS))])
+                    .font_weight(FontWeightKeyword::Thin)
                     .font_size(30.0)
                     .on_mouse_down(|_, _| {
                         // FIXME: On Windows this blocks, and while this is blocking a timer may
@@ -138,11 +139,13 @@ fn main_column(cx: &mut Context) {
                     .top(Stretch(1.0))
                     .bottom(Pixels(4.0))
                     .left(Pixels(2.0));
-            });
+            })
+            .size(Auto);
         })
         .height(Pixels(30.0))
         .right(Pixels(17.0))
-        .bottom(Pixels(-5.0))
+        // Somehow this overrides the 'row-between' value now
+        .bottom(Pixels(8.0))
         .left(Pixels(10.0))
         .top(Pixels(10.0))
         // This contains the editor mode buttom all the way on the left, and the plugin's name all the way on the right
@@ -162,72 +165,59 @@ fn main_column(cx: &mut Context) {
                      use this in a project, make sure to bounce things to audio just in case \
                      they'll sound different later.",
                 )
+                .text_wrap(true)
                 .font_size(11.0)
                 .left(Pixels(15.0))
                 .right(Pixels(8.0))
-                // The column isn't tall enough without this, for some reason
-                .bottom(Pixels(20.0))
                 .width(Stretch(1.0));
             });
         })
-        .height(Auto)
-        .width(Stretch(1.0));
+        .size(Auto);
 
         HStack::new(cx, |cx| {
             make_column(cx, "Upwards", |cx| {
                 // We don't want to show the 'Upwards' prefix here, but it should still be in
                 // the parameter name so the parameter list makes sense
                 let upwards_compressor_params = Data::params.map(|p| p.compressors.upwards.clone());
-                GenericUi::new_custom(
-                    cx,
-                    upwards_compressor_params.clone(),
-                    move |cx, param_ptr| {
-                        let upwards_compressor_params = upwards_compressor_params.clone();
-                        HStack::new(cx, move |cx| {
-                            Label::new(
-                                cx,
-                                unsafe { param_ptr.name() }
-                                    .strip_prefix("Upwards ")
-                                    .expect("Expected parameter name prefix, this is a bug"),
-                            )
-                            .class("label");
+                GenericUi::new_custom(cx, upwards_compressor_params, |cx, param_ptr| {
+                    HStack::new(cx, |cx| {
+                        Label::new(
+                            cx,
+                            unsafe { param_ptr.name() }
+                                .strip_prefix("Upwards ")
+                                .expect("Expected parameter name prefix, this is a bug"),
+                        )
+                        .class("label");
 
-                            GenericUi::draw_widget(cx, upwards_compressor_params, param_ptr);
-                        })
-                        .class("row");
-                    },
-                );
+                        GenericUi::draw_widget(cx, upwards_compressor_params, param_ptr);
+                    })
+                    .class("row");
+                });
             });
 
             make_column(cx, "Downwards", |cx| {
                 let downwards_compressor_params =
                     Data::params.map(|p| p.compressors.downwards.clone());
-                GenericUi::new_custom(
-                    cx,
-                    downwards_compressor_params.clone(),
-                    move |cx, param_ptr| {
-                        let downwards_compressor_params = downwards_compressor_params.clone();
-                        HStack::new(cx, move |cx| {
-                            Label::new(
-                                cx,
-                                unsafe { param_ptr.name() }
-                                    .strip_prefix("Downwards ")
-                                    .expect("Expected parameter name prefix, this is a bug"),
-                            )
-                            .class("label");
+                GenericUi::new_custom(cx, downwards_compressor_params, |cx, param_ptr| {
+                    HStack::new(cx, |cx| {
+                        Label::new(
+                            cx,
+                            unsafe { param_ptr.name() }
+                                .strip_prefix("Downwards ")
+                                .expect("Expected parameter name prefix, this is a bug"),
+                        )
+                        .class("label");
 
-                            GenericUi::draw_widget(cx, downwards_compressor_params, param_ptr);
-                        })
-                        .class("row");
-                    },
-                );
+                        GenericUi::draw_widget(cx, downwards_compressor_params, param_ptr);
+                    })
+                    .class("row");
+                });
             });
         })
-        .height(Auto)
-        .width(Stretch(1.0));
+        .size(Auto);
     })
     .width(Pixels(COLLAPSED_GUI_WIDTH as f32))
-    .row_between(Pixels(15.0))
+    .row_between(Pixels(10.0))
     .child_left(Stretch(1.0))
     .child_right(Stretch(1.0));
 }
@@ -244,9 +234,8 @@ fn analyzer_column(cx: &mut Context) {
 fn make_column(cx: &mut Context, title: &str, contents: impl FnOnce(&mut Context)) {
     VStack::new(cx, |cx| {
         Label::new(cx, title)
-            .font_family(vec![FamilyOwned::Name(String::from(
-                assets::NOTO_SANS_THIN,
-            ))])
+            .font_family(vec![FamilyOwned::Name(String::from(assets::NOTO_SANS))])
+            .font_weight(FontWeightKeyword::Thin)
             .font_size(23.0)
             .left(Stretch(1.0))
             // This should align nicely with the right edge of the slider

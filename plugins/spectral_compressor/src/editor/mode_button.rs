@@ -1,5 +1,5 @@
 // Spectral Compressor: an FFT based compressor
-// Copyright (C) 2021-2023 Robbert van der Helm
+// Copyright (C) 2021-2024 Robbert van der Helm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ pub struct EditorModeButton {
 
 impl EditorModeButton {
     /// Creates a new button bound to the editor mode setting.
-    pub fn new<L, T>(cx: &mut Context, lens: L, label: impl Res<T>) -> Handle<Self>
+    pub fn new<L, T>(cx: &mut Context, lens: L, label: impl Res<T> + Clone) -> Handle<Self>
     where
         L: Lens<Target = Arc<AtomicCell<EditorMode>>>,
         T: ToString,
     {
         Self { mode: lens.get(cx) }
-            .build(cx, move |cx| {
+            .build(cx, |cx| {
                 Label::new(cx, label).hoverable(false);
             })
             .checked(lens.map(|v| v.load() == EditorMode::AnalyzerVisible))

@@ -1,5 +1,5 @@
 // Diopser: a phase rotation plugin
-// Copyright (C) 2021-2023 Robbert van der Helm
+// Copyright (C) 2021-2024 Robbert van der Helm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use atomic_float::AtomicF32;
-use nih_plug::nih_debug_assert_failure;
+use nih_plug::debug::*;
 use nih_plug::prelude::{Editor, Plugin};
 use nih_plug_vizia::vizia::prelude::*;
 use nih_plug_vizia::widgets::*;
@@ -68,17 +68,19 @@ pub(crate) fn create(editor_data: Data, editor_state: Arc<ViziaState>) -> Option
         assets::register_noto_sans_light(cx);
         assets::register_noto_sans_thin(cx);
 
-        cx.add_theme(include_str!("editor/theme.css"));
+        if let Err(err) = cx.add_stylesheet(include_style!("src/editor/theme.css")) {
+            nih_error!("Failed to load stylesheet: {err:?}")
+        }
 
         editor_data.clone().build(cx);
-
-        ResizeHandle::new(cx);
 
         VStack::new(cx, |cx| {
             top_bar(cx);
             spectrum_analyzer(cx);
             other_params(cx);
         });
+
+        ResizeHandle::new(cx);
     })
 }
 
@@ -86,9 +88,8 @@ pub(crate) fn create(editor_data: Data, editor_state: Arc<ViziaState>) -> Option
 fn top_bar(cx: &mut Context) {
     HStack::new(cx, |cx| {
         Label::new(cx, "Diopser")
-            .font_family(vec![FamilyOwned::Name(String::from(
-                assets::NOTO_SANS_THIN,
-            ))])
+            .font_family(vec![FamilyOwned::Name(String::from(assets::NOTO_SANS))])
+            .font_weight(FontWeightKeyword::Thin)
             .font_size(37.0)
             .top(Pixels(2.0))
             .left(Pixels(8.0))
@@ -122,6 +123,7 @@ fn top_bar(cx: &mut Context) {
                 .for_bypass()
                 .left(Pixels(10.0));
         })
+        .width(Auto)
         .child_space(Pixels(10.0))
         .left(Stretch(1.0));
     })
@@ -136,10 +138,7 @@ fn spectrum_analyzer(cx: &mut Context) {
     HStack::new(cx, |cx| {
         Label::new(cx, "Resonance")
             .font_size(18.0)
-            // HACK: Rotating doesn't really work in vizia, but with text wrap disabled this at
-            //       least visually does the right thing
-            .text_wrap(false)
-            .rotate(270.0f32)
+            .rotate(Angle::Deg(270.0f32))
             .width(Pixels(LABEL_HEIGHT))
             .height(Pixels(SPECTRUM_ANALYZER_HEIGHT))
             // HACK: The `.space()` on the HStack doesn't seem to work correctly here
@@ -184,15 +183,19 @@ fn spectrum_analyzer(cx: &mut Context) {
                 .height(Pixels(20.0))
                 .child_space(Stretch(1.0));
         })
-        .space(Pixels(10.0))
+        .left(Pixels(10.0))
+        .right(Pixels(10.0))
+        .top(Pixels(10.0))
+        .height(Auto)
         .width(Stretch(1.0));
-    });
+    })
+    .height(Auto);
 }
 
 /// The area below the spectrum analyzer that contains all of the other parameters.
 fn other_params(cx: &mut Context) {
     VStack::new(cx, |cx| {
-        HStack::new(cx, move |cx| {
+        HStack::new(cx, |cx| {
             Label::new(cx, "Filter Stages").class("param-label");
             RestrictedParamSlider::new(
                 cx,
@@ -208,25 +211,26 @@ fn other_params(cx: &mut Context) {
                 },
             );
         })
+        .size(Auto)
         .bottom(Pixels(10.0));
 
-        HStack::new(cx, move |cx| {
+        HStack::new(cx, |cx| {
             Label::new(cx, "Frequency Spread").class("param-label");
             ParamSlider::new(cx, Data::params, |params| &params.filter_spread_octaves);
         })
+        .size(Auto)
         .bottom(Pixels(10.0));
 
-        HStack::new(cx, move |cx| {
+        HStack::new(cx, |cx| {
             Label::new(cx, "Spread Style").class("param-label");
             ParamSlider::new(cx, Data::params, |params| &params.filter_spread_style)
                 .set_style(ParamSliderStyle::CurrentStepLabeled { even: true });
-        });
+        })
+        .size(Auto);
     })
     .id("param-sliders")
     .width(Percentage(100.0))
-    .top(Pixels(7.0))
     // This should take up all remaining space
-    .bottom(Stretch(1.0))
-    .child_space(Stretch(1.0))
-    .child_left(Stretch(1.0));
+    .height(Stretch(1.0))
+    .child_space(Stretch(1.0));
 }

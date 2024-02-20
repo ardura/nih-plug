@@ -10,6 +10,81 @@ Since there is no stable release yet, the changes are organized per day in
 reverse chronological order. The main purpose of this document in its current
 state is to list breaking changes.
 
+## [2023-12-30]
+
+### Breaking changes
+
+- `nih_plug_vizia` has been updated to the latest Vizia version. Vizia's styling
+  system has changed a lot since the last update, so plugin GUIs and stylesheets
+  may require small changes before they behave the same again. A summary of the
+  most important changes can be found in Vizia PR
+  [#291](https://github.com/vizia/vizia/pull/291). Some notable breaking changes
+  include:
+
+  - Font handling and choosing between different variations of the same font
+    (e.g. `Noto Sans` versus `Noto Sans Light` versus `Noto Sans Light Italic`)
+    works very differently now.
+  - `ResizeHandle` now needs to be the last element in a GUI because of changes
+    to Vizia's event targetting mechanism.
+
+- The `raw_window_handle` version used by NIH-plug has been updated to version
+  0.5.x.
+
+### Added
+
+- Added initial RISC-V support to `nih_plug_xtask`.
+  ([#95](https://github.com/robbert-vdh/nih-plug/pull/95)).
+
+### Changed
+
+- `ParentWindowHandle` has changed to be a sum type of different parent window
+  handle types, similar to `RawWindowHandle`. This makes it easier to use GUI
+  libraries that link against a different version of `raw_window_handle` than
+  the one used by NIH-plug itself by simply wrapping around
+  `ParentWindowHandle`.
+- `nih_debug_assert*!()` failures are now promoted to a warning instead of a
+  debug message. This makes the non-fatal debug assertion failures easier to
+  spot.
+- The minimum scale factor in `nih_plug_vizia` has changed from 0.25 to 0.5.
+  Vizia rounds things to single pixels, and below 0.5 scaling single pixel
+  borders would disappear when not using a HiDPI setup.
+
+### Fixed
+
+- Various `baseview` dependencies now have their versions pinned.
+
+## [2023-12-06]
+
+### Fixed
+
+- `nih_export_vst3!()` no longer requires `nih_debug_assert` to be in scope.
+
+## [2023-11-05]
+
+### Changed
+
+- `FloatParam` and `IntParam` ranges can now be accessed using methods on the
+  parameters ([#89](https://github.com/robbert-vdh/nih-plug/pull/89)).
+
+## [2023-09-21]
+
+### Fixed
+
+- Fixed null pointers assertions in the low level buffer management code not
+  working correctly.
+
+## [2023-09-03]
+
+### Added
+
+- `nih_export_vst3!()` now also supports more than one plugin type argument,
+  just like `nih_export_clap!()`.
+
+### Fixed
+
+- The `nih_export_*!()` macros now use `$crate` to refer to NIH-plug itself,
+  which makes it possible to use the NIH-plug crate under a different name.
+
 ## [2023-08-05]
 
 ### Breaking changes
