@@ -166,7 +166,8 @@ impl SmoothingStyle {
                 (current * coefficient) + (target * (1.0 - coefficient))
             },
             Self::LogSteep(_) => {
-                current * (step_size.powf(steps as f32 * 0.4)),
+                current * (step_size.powf(steps as f32 * 0.4))
+            },
         }
     }
 }
