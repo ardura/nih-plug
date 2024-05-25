@@ -22,7 +22,7 @@ baseview = { git = "https://github.com/RustAudio/baseview.git", rev = "45465c5f4
 crossbeam = "0.8"
 #egui-baseview = { git = "https://github.com/BillyDM/egui-baseview.git", rev = "68c4d0e8e5c1c702a888a245f4ac50eddfdfcaed", default-features = false }
 # first iteration egui-baseview = { git = "https://github.com/ardura/egui-baseview.git", rev = "ee50bbc86f204426939cda058f895c8d96746388", default-features = false }
-egui-baseview = { git = "https://github.com/ardura/egui-baseview.git", rev = "57b6edd7d3ddb778cd6398cc4ac80f9f801ac57b", default-features = false }
+egui-baseview = { git = "https://github.com/ardura/egui-baseview.git", rev = "03dd37a395e08d7ed224dee8d05dcd55302d7d79", default-features = false }
 lazy_static = "1.4"
 parking_lot = "0.12"
 # To make the state persistable
