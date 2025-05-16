@@ -37,6 +37,8 @@ pub enum SmoothingStyle {
     /// This results in a smoother transition, with the caveat being that there will be a tiny jump
     /// at the end. Unlike the `Logarithmic` option, this does support crossing the zero value.
     Exponential(f32),
+    /// Smooth using a scaled Logarithmic function for a steeper curve behavior
+    LogSteep(f32),
 }
 
 /// A smoother, providing a smoothed value for each sample.
@@ -86,7 +88,7 @@ impl SmoothingStyle {
             }
 
             Self::None => 1,
-            Self::Linear(time) | Self::Logarithmic(time) | Self::Exponential(time) => {
+            Self::Linear(time) | Self::Logarithmic(time) | Self::Exponential(time) | Self::LogSteep(time) => {
                 nih_debug_assert!(*time >= 0.0);
                 (sample_rate * time / 1000.0).round() as u32
             }
@@ -115,6 +117,12 @@ impl SmoothingStyle {
             // reaches 99.99% of the target value after `num_steps`. The smoother will snap to the
             // target value after that point.
             Self::Exponential(_) => 0.0001f64.powf((num_steps as f64).recip()) as f32,
+            Self::LogSteep(_) => {
+                // We need to solve `start * (step_size ^ num_steps) = target` for `step_size`
+                nih_debug_assert_ne!(start, 0.0);
+                let steepness_factor = 0.9;
+                ((target / start) as f64).powf((num_steps as f64).powf(steepness_factor).recip()) as f32
+            }
         }
     }
 
@@ -133,6 +141,7 @@ impl SmoothingStyle {
             Self::Linear(_) => current + step_size,
             Self::Logarithmic(_) => current * step_size,
             Self::Exponential(_) => (current * step_size) + (target * (1.0 - step_size)),
+            Self::LogSteep(_) => current * step_size,
         }
     }
 
@@ -157,7 +166,11 @@ impl SmoothingStyle {
                 // (target * (1 - step_size))` in a loop since the target value won't change
                 let coefficient = step_size.powi(steps as i32);
                 (current * coefficient) + (target * (1.0 - coefficient))
-            }
+            },
+            Self::LogSteep(_) => {
+                let steepness_factor = 0.9; // Must match the one in step_size()
+                current * (step_size.powf((steps as f32).powf(steepness_factor)))
+            },
         }
     }
 }
