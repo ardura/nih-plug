@@ -707,7 +707,7 @@ dependencies = [
 [[package]]
 name = "baseview"
 version = "0.1.0"
-source = "git+https://github.com/RustAudio/baseview.git?rev=579130ecb4f9f315ae52190af42f0ea46aeaa4a2#579130ecb4f9f315ae52190af42f0ea46aeaa4a2"
+source = "git+https://github.com/RustAudio/baseview.git?rev=3724a00c970a9cd10a3494fa3c37bca66d631bb7#3724a00c970a9cd10a3494fa3c37bca66d631bb7"
 dependencies = [
  "cocoa",
  "core-foundation 0.9.4",
@@ -1804,9 +1804,9 @@ dependencies = [
 
 [[package]]
 name = "ecolor"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc4feb366740ded31a004a0e4452fbf84e80ef432ecf8314c485210229672fd1"
+checksum = "b6a7fc3172c2ef56966b2ce4f84177e159804c40b9a84de8861558ce4a59f422"
 dependencies = [
  "bytemuck",
  "emath",
@@ -1814,9 +1814,9 @@ dependencies = [
 
 [[package]]
 name = "egui"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25dd34cec49ab55d85ebf70139cb1ccd29c977ef6b6ba4fe85489d6877ee9ef3"
+checksum = "49e2be082f77715496b4a39fdc6f5dc7491fefe2833111781b8697ea6ee919a7"
 dependencies = [
  "ahash",
  "bitflags 2.9.1",
@@ -1824,14 +1824,16 @@ dependencies = [
  "epaint",
  "nohash-hasher",
  "profiling",
+ "smallvec",
+ "unicode-segmentation",
 ]
 
 [[package]]
 name = "egui-baseview"
-version = "0.5.0"
-source = "git+https://github.com/BillyDM/egui-baseview.git?rev=ec70c3fe6b2f070dcacbc22924431edbe24bd1c0#ec70c3fe6b2f070dcacbc22924431edbe24bd1c0"
+version = "0.6.0"
+source = "git+https://github.com/BillyDM/egui-baseview.git?rev=b6bcb51312bf9b2b710753475f7efb4cfe39ddef#b6bcb51312bf9b2b710753475f7efb4cfe39ddef"
 dependencies = [
- "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=9a0b42c09d712777b2edb4c5e0cb6baf21e988f0)",
+ "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=3724a00c970a9cd10a3494fa3c37bca66d631bb7)",
  "copypasta 0.10.2",
  "egui",
  "egui_glow",
@@ -1844,9 +1846,9 @@ dependencies = [
 
 [[package]]
 name = "egui_glow"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "910906e3f042ea6d2378ec12a6fd07698e14ddae68aed2d819ffe944a73aab9e"
+checksum = "0ab645760288e42eab70283a5cccf44509a6f43b554351855d3c73594bfe3c23"
 dependencies = [
  "ahash",
  "bytemuck",
@@ -1857,7 +1859,7 @@ dependencies = [
  "profiling",
  "wasm-bindgen",
  "web-sys",
- "winit 0.30.10",
+ "winit 0.30.12",
 ]
 
 [[package]]
@@ -1868,9 +1870,9 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "emath"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e4cadcff7a5353ba72b7fea76bf2122b5ebdbc68e8155aa56dfdea90083fe1b"
+checksum = "935df67dc48fdeef132f2f7ada156ddc79e021344dd42c17f066b956bb88dde3"
 dependencies = [
  "bytemuck",
 ]
@@ -1898,9 +1900,9 @@ dependencies = [
 
 [[package]]
 name = "epaint"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41fcc0f5a7c613afd2dee5e4b30c3e6acafb8ad6f0edb06068811f708a67c562"
+checksum = "b66fc0a5a9d322917de9bd3ac7d426ca8aa3127fbf1e76fae5b6b25e051e06a3"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -1916,9 +1918,9 @@ dependencies = [
 
 [[package]]
 name = "epaint_default_fonts"
-version = "0.31.1"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc7e7a64c02cf7a5b51e745a9e45f60660a286f151c238b9d397b3e923f5082f"
+checksum = "4f6cf8ce0fb817000aa24f5e630bda904a353536bd430b83ebc1dceee95b4a3a"
 
 [[package]]
 name = "equivalent"
@@ -3569,7 +3571,7 @@ dependencies = [
  "atomic_float",
  "atomic_refcell",
  "backtrace",
- "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=579130ecb4f9f315ae52190af42f0ea46aeaa4a2)",
+ "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=3724a00c970a9cd10a3494fa3c37bca66d631bb7)",
  "bitflags 1.3.2",
  "cfg-if",
  "clap",
@@ -3615,7 +3617,7 @@ dependencies = [
 name = "nih_plug_egui"
 version = "0.0.0"
 dependencies = [
- "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=9a0b42c09d712777b2edb4c5e0cb6baf21e988f0)",
+ "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=3724a00c970a9cd10a3494fa3c37bca66d631bb7)",
  "crossbeam",
  "egui-baseview",
  "nih_plug",
@@ -7040,9 +7042,9 @@ dependencies = [
 
 [[package]]
 name = "winit"
-version = "0.30.10"
+version = "0.30.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0d05bd8908e14618c9609471db04007e644fd9cce6529756046cfc577f9155e"
+checksum = "c66d4b9ed69c4009f6321f762d6e61ad8a2389cd431b97cb1e146812e9e6c732"
 dependencies = [
  "android-activity 0.6.0",
  "atomic-waker",
